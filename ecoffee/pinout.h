@@ -9,14 +9,10 @@
 #define PIN_TEMP          5
 #define PIN_FLOWMETER     6
 
-#define PIN_STEPPER_IN1		8
-#define PIN_STEPPER_IN2		9
-#define PIN_STEPPER_IN3		10
-#define PIN_STEPPER_IN4		11
 
 //Alarms 
 #define PIN_BUZZER        3
-
+#define PIN_BREWHEAT      8
 #define PIN_ACS_712       A0
 
 #endif

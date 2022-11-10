@@ -6,6 +6,6 @@
 #define LCD_I2C 1
 
 #define TIME_SEND_WIFI      20000
-
+#define TIME_BUZZER         500
 
 #endif

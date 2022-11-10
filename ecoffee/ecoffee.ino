@@ -49,6 +49,7 @@ int analog_zero[]={0,0};
 
 void setup() {
     //pinMode(PIN_ACS_712,INPUT);  //Define the pin mode
+    pinMode(PIN_BREWHEAT,OUTPUT); 
     //wifi.Init();
     sensors.begin();
     //init_display();
@@ -74,6 +75,7 @@ void setup() {
 
     writeLine(1, "I:", 0);
     writeLine(1, "Ir:", 8);
+    digitalWrite(PIN_BREWHEAT, LOW);
 }
 	
 void loop() {
@@ -81,12 +83,19 @@ void loop() {
     temphead=sensors.getTempC(sensor1);
     if ( pidstill.getState() == WARM_UP ) {
     }
+
+    if (temphead < 96) {
+      digitalWrite(PIN_BREWHEAT, LOW);
+      } else {
+      digitalWrite(PIN_BREWHEAT, HIGH);
+    }
     if ( curr_time > temp_readnshowtime + TIME_READNSHOW_TEMPS ) {   
         sensors.requestTemperatures();
         //Serial.print("Sensor 1(*C): ");
         dtostrf(temphead, 2, 1, tempstr);
         writeLine(0, tempstr, 2);
-        dtostrf(sensors.getTempC(sensor2), 2, 1, tempstr);
+        temp = sensors.getTempC(sensor2);
+        dtostrf(temp, 2, 1, tempstr);
         //Serial.print(sensors.getTempC(sensor1)); 
         writeLine(0, tempstr, 11);
         //Serial.print("Sensor 2(*C): ");
@@ -94,15 +103,37 @@ void loop() {
 
 
         
-        writeLine(1, tempstr, 11);
-        Serial.println(tempstr);
+        //writeLine(1, tempstr, 11);
+        //Serial.println(tempstr);
 
 
-        dtostrf(corr_rms, 2, 1, tempstr);
-        writeLine(1, tempstr, 2);
+//        dtostrf(corr_rms, 2, 1, tempstr);
+//        writeLine(1, tempstr, 2);
         
         temp_readnshowtime = curr_time;
     }
+
+
+    //        if (alarm_state > 0) {
+    //
+    //              if (!buzzmuted) {
+    //                  if (millis() > timebuzz + TIME_BUZZER) {
+    //                      timebuzz=millis();
+    //                      isbuzzeron=!isbuzzeron;
+    //                      if (isbuzzeron){
+    //                          digitalWrite(PIN_BUZZER,BUZZER_LOW);
+    //                      }
+    //                      else {
+    //                          digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+    //                      }
+    //                  }
+    //              } else {  //buzz muted
+    //                  digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+    //              }
+    //        } else {//state > 0
+    //          digitalWrite(PIN_BUZZER,!BUZZER_LOW);
+    //          isbuzzeron=true;        //Inverted logic
+    //        }
 
 //    if (curr_time > time_sendwifi + TIME_SEND_WIFI) {
 //        wifi.sendFloat(temphead);
