@@ -27,6 +27,7 @@ unsigned long printPeriod = 500;
 float Sensibilidad=0.100; //sensibilidad en Voltios/Amperio para sensor de 5A
 double corr_rms;
 
+bool first_heating;
 
 //Object definition 
 //Stepper           stepper(STEPS, PIN_STEPPER_IN1, PIN_STEPPER_IN2, PIN_STEPPER_IN3, PIN_STEPPER_IN4);
@@ -56,7 +57,7 @@ void setup() {
     lcd.init();
     lcd.backlight();
     //lcd.clear();
-    //writeLine(0, "eStill v0.1", 2);
+    //writeLine(0, "eCoffee v0.1", 2);
     Serial.begin(115200);
 
     //lcd.clear();
@@ -76,6 +77,8 @@ void setup() {
     writeLine(1, "I:", 0);
     writeLine(1, "Ir:", 8);
     digitalWrite(PIN_BREWHEAT, LOW);
+
+    first_heating = true;
 }
 	
 void loop() {
@@ -83,8 +86,8 @@ void loop() {
     temphead=sensors.getTempC(sensor1);
     if ( pidstill.getState() == WARM_UP ) {
     }
-
-    if (temphead < 96) {
+  
+    if (temphead < 92) {
       digitalWrite(PIN_BREWHEAT, LOW);
       } else {
       digitalWrite(PIN_BREWHEAT, HIGH);
