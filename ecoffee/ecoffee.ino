@@ -49,6 +49,9 @@ float temphead;
 int analog_zero[]={0,0};
 
 void setup() {
+
+    //wifi.Init();
+    
     //pinMode(PIN_ACS_712,INPUT);  //Define the pin mode
     pinMode(PIN_BREWHEAT,OUTPUT); 
     //wifi.Init();
@@ -92,6 +95,12 @@ void loop() {
       } else {
       digitalWrite(PIN_BREWHEAT, HIGH);
     }
+
+    //    if (curr_time > time_sendwifi + TIME_SEND_WIFI) {
+    //        wifi.sendFloat(temphead);
+    //        time_sendwifi = curr_time;
+    //    }
+
     if ( curr_time > temp_readnshowtime + TIME_READNSHOW_TEMPS ) {   
         sensors.requestTemperatures();
         //Serial.print("Sensor 1(*C): ");
