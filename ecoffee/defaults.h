@@ -5,7 +5,7 @@
 #define TIME_READNSHOW_TEMPS  2000 //MSeconds
 #define LCD_I2C 1
 
-#define TIME_SEND_WIFI      20000
+#define TIME_SEND_WIFI      15000
 #define TIME_BUZZER         500
 
 #endif

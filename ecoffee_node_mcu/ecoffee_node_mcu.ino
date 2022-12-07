@@ -53,6 +53,7 @@ WiFiClient  client;
 bool heating,cooling;
 float temp = 0;
 
+
 void check_conn(){
     // Connect or reconnect to WiFi
     if(WiFi.status() != WL_CONNECTED){
