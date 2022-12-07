@@ -1,0 +1,5 @@
+New library is here
+
+Is it not best to use the single file one?
+
+https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi
