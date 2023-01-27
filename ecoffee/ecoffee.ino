@@ -27,7 +27,6 @@ unsigned long printPeriod = 500;
 float Sensibilidad=0.100; //sensibilidad en Voltios/Amperio para sensor de 5A
 double corr_rms;
 
-bool first_heating;
 
 //Object definition 
 //Stepper           stepper(STEPS, PIN_STEPPER_IN1, PIN_STEPPER_IN2, PIN_STEPPER_IN3, PIN_STEPPER_IN4);
@@ -44,9 +43,18 @@ unsigned long temp_readnshowtime;
 unsigned long time_sendwifi;
 unsigned long curr_time;
 //RunningStatistics inputStats;                 // create statistics to look at the raw test signal
-float temphead;
+float temphead,prev_temphead;
 
+
+float init_heat_timecount;
+float min_dTdt_toheatup;      //Once maximum dTdt has been reached
+unsigned long init_heat_time;
+bool is_heating;
 int analog_zero[]={0,0};
+bool ready_to_heat;
+bool is_dT_rising_slow;
+float dT_max;//dTdt
+float dT, prev_dT;//dTdt
 
 void setup() {
 
@@ -71,35 +79,49 @@ void setup() {
     lcd.print("eStill v0.1");
     Serial.println("estill");
     delay(1500);
-    writeLine(0, "T:     Tr:", 0); 
-
+    writeLine(0, "T:     T:", 0); 
+    writeLine(0, "      dT:", 0); 
+    
     for (int i=0;i<20;i++)
       analog_zero[0]+=analogRead(PIN_ACS_712);
    analog_zero[0]/=20;
 
-    writeLine(1, "I:", 0);
-    writeLine(1, "Ir:", 8);
-    digitalWrite(PIN_BREWHEAT, LOW);
+    is_heating = true;
+   //Calculate initial heat up time in seconds
+   temphead = prev_temphead = sensors.getTempC(sensor1);
+   init_heat_timecount = 1.2 * 4184.0 * (95.0 - temphead)/1500.0;
 
-    first_heating = true;
+   min_dTdt_toheatup = 0.05;
+   init_heat_time=millis();
+   is_heating = true;
+   digitalWrite(PIN_BREWHEAT, LOW); //inverted
+   ready_to_heat = false;
+   is_dT_rising_slow = false;
+
+   dT_max = 0.;
+   dT = -10.;
 }
 	
 void loop() {
+
+  float rem_time;
+  
+    if (is_heating) {
+      rem_time = init_heat_timecount*1000 - (float)(curr_time - init_heat_time)/1000.0;
+      if (rem_time > 0.0){
+        is_heating = false;
+        digitalWrite(PIN_BREWHEAT, HIGH); //inverted
+        }      
+    }
+    
     curr_time=millis();
     temphead=sensors.getTempC(sensor1);
     if ( pidstill.getState() == WARM_UP ) {
     }
-  
-    if (temphead < 92) {
-      digitalWrite(PIN_BREWHEAT, LOW);
-      } else {
-      digitalWrite(PIN_BREWHEAT, HIGH);
-    }
+ 
 
-    //    if (curr_time > time_sendwifi + TIME_SEND_WIFI) {
-    //        wifi.sendFloat(temphead);
-    //        time_sendwifi = curr_time;
-    //    }
+   if (is_heating)  writeLine(0, "H", 15);
+   else             writeLine(0, " ", 15);
 
     if ( curr_time > temp_readnshowtime + TIME_READNSHOW_TEMPS ) {   
         sensors.requestTemperatures();
@@ -109,18 +131,38 @@ void loop() {
         temp = sensors.getTempC(sensor2);
         dtostrf(temp, 2, 1, tempstr);
         //Serial.print(sensors.getTempC(sensor1)); 
-        writeLine(0, tempstr, 11);
+        writeLine(0, tempstr, 9);
         //Serial.print("Sensor 2(*C): ");
         //Serial.print(sensors.getTempC(sensor2));    
 
+        prev_dT = dT;
+        dT = (temphead - prev_temphead)*1000./TIME_READNSHOW_TEMPS;
+        dtostrf(dT, 2, 1, tempstr);
+        writeLine(1, tempstr, 9);
 
-        
-        //writeLine(1, tempstr, 11);
-        //Serial.println(tempstr);
+        if (is_heating){
+          dtostrf(rem_time, 2, 0, tempstr);
+          writeLine(1, tempstr, 0);
+          } else {
+          dtostrf(dT, 2, 0, tempstr);
+          writeLine(1, tempstr, 0);            
+            }
+          
+        if (dT>dT_max) dT_max = dT;
+        if (dT < prev_dT ) { //slowing rising
+          writeLine(1, "S", 15);
+          if (dT < 0.05){
+            if (temphead < 92.0){
+                is_heating = true;
+                digitalWrite(PIN_BREWHEAT, LOW); //inverted
+                init_heat_timecount = 1.2 * 4184.0 * (92.0 - temphead)/1500.0;
+                init_heat_time = millis();
+              }
+            }
+        } else {
+          writeLine(0, " ", 15);
+        }
 
-
-//        dtostrf(corr_rms, 2, 1, tempstr);
-//        writeLine(1, tempstr, 2);
         
         temp_readnshowtime = curr_time;
     }
