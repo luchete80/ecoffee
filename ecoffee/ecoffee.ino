@@ -80,7 +80,7 @@ void setup() {
     Serial.println("estill");
     delay(1500);
     writeLine(0, "T:     T:", 0); 
-    writeLine(0, "      dT:", 0); 
+    writeLine(1, "      dT:", 0); 
     
     for (int i=0;i<20;i++)
       analog_zero[0]+=analogRead(PIN_ACS_712);
