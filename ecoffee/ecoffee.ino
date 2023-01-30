@@ -105,7 +105,9 @@ void setup() {
 void loop() {
 
   float rem_time;
-  
+  curr_time=millis(); 
+
+  //Not calculate each time     
     if (is_heating) {
       rem_time = init_heat_timecount - (float)(curr_time - init_heat_time)/1000.0;
       Serial.println("rem_time"+String(rem_time));
@@ -115,7 +117,6 @@ void loop() {
         }      
     }
     
-    curr_time=millis();
     temphead=sensors.getTempC(sensor1);
     if ( pidstill.getState() == WARM_UP ) {
     }
