@@ -107,8 +107,9 @@ void loop() {
   float rem_time;
   
     if (is_heating) {
-      rem_time = init_heat_timecount*1000 - (float)(curr_time - init_heat_time)/1000.0;
-      if (rem_time > 0.0){
+      rem_time = init_heat_timecount - (float)(curr_time - init_heat_time)/1000.0;
+      Serial.println("rem_time"+String(rem_time));
+      if (rem_time < 0.0){
         is_heating = false;
         digitalWrite(PIN_BREWHEAT, HIGH); //inverted
         }      
@@ -141,7 +142,7 @@ void loop() {
         writeLine(1, tempstr, 9);
 
         if (is_heating){
-          dtostrf(rem_time, 2, 0, tempstr);
+          dtostrf(rem_time, 2, 1, tempstr);
           writeLine(1, tempstr, 0);
           } else {
           dtostrf(dT, 2, 0, tempstr);
@@ -217,7 +218,6 @@ void loop() {
           //  Amps_TRMS=min;
         }
         //Amps_TRMS/=10.;
-        Serial.println("");
 
         corr_rms=ac_read(analog_zero[0]);
         //dtostrf(Amps_TRMS, 2, 3, tempstr);
