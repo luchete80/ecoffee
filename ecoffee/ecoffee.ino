@@ -76,8 +76,8 @@ void setup() {
 
     //inputStats.setWindowSecs( windowLength );     //Set the window length
     temp_readnshowtime = time_sendwifi= curr_time = millis();
-    lcd.print("eStill v0.1");
-    Serial.println("estill");
+    lcd.print("eCoffee v0.1.0");
+    Serial.println("ecoffee");
     delay(1500);
     writeLine(0, "T:     T:", 0); 
     writeLine(1, "      dT:", 0); 
@@ -117,7 +117,6 @@ void loop() {
         }      
     }
     
-    temphead=sensors.getTempC(sensor1);
     if ( pidstill.getState() == WARM_UP ) {
     }
  
@@ -128,9 +127,12 @@ void loop() {
     if ( curr_time > temp_readnshowtime + TIME_READNSHOW_TEMPS ) {   
         sensors.requestTemperatures();
         //Serial.print("Sensor 1(*C): ");
+        temp = sensors.getTempC(sensor2); 
+        prev_temphead = temphead;
+        temphead=sensors.getTempC(sensor1); //THIS IS THE MAIN
         dtostrf(temphead, 2, 1, tempstr);
         writeLine(0, tempstr, 2);
-        temp = sensors.getTempC(sensor2);
+
         dtostrf(temp, 2, 1, tempstr);
         //Serial.print(sensors.getTempC(sensor1)); 
         writeLine(0, tempstr, 9);
@@ -139,7 +141,7 @@ void loop() {
 
         prev_dT = dT;
         dT = (temphead - prev_temphead)*1000./TIME_READNSHOW_TEMPS;
-        dtostrf(dT, 2, 1, tempstr);
+        dtostrf(dT, 4, 2, tempstr);
         writeLine(1, tempstr, 9);
 
         if (is_heating){
