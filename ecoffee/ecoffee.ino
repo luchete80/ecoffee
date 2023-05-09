@@ -27,7 +27,8 @@ unsigned long printPeriod = 500;
 float Sensibilidad=0.100; //sensibilidad en Voltios/Amperio para sensor de 5A
 double corr_rms;
 
-
+int t_wait_reheat = 20;  //one reached maximum temp
+unsigned long time_stop_heat;
 //Object definition 
 //Stepper           stepper(STEPS, PIN_STEPPER_IN1, PIN_STEPPER_IN2, PIN_STEPPER_IN3, PIN_STEPPER_IN4);
 pid_still         pidstill;
@@ -58,7 +59,8 @@ float dT, prev_dT;//dTdt
 int pumpsw_state;
 
 void setup() {
-
+    
+    time_stop_heat = 0;
     //wifi.Init();
     pinMode(PIN_PUMPSW,INPUT_PULLUP); 
     //pinMode(PIN_ACS_712,INPUT);  //Define the pin mode
@@ -109,8 +111,9 @@ void loop() {
   float rem_time;
   curr_time=millis(); 
   pumpsw_state = digitalRead(PIN_PUMPSW);
-  
-  if (pumpsw_state == HIGH) {
+  // Keep in mind the pull-up means the pushbutton's logic is inverted. It goes
+  // HIGH when it's open, and LOW when it's pressed. 
+  if (pumpsw_state == LOW) { //pressed
     digitalWrite(PIN_PUMP, LOW); // RELAY IS INVERTED
   } else {
     digitalWrite(PIN_PUMP, HIGH);
@@ -123,6 +126,7 @@ void loop() {
       if (rem_time < 0.0){
         is_heating = false;
         digitalWrite(PIN_BREWHEAT, HIGH); //inverted
+        time_stop_heat = millis();
         }      
     }
     
@@ -166,10 +170,12 @@ void loop() {
           writeLine(1, "S", 15);
           if (dT < 0.05){
             if (temphead < 95.0){
-                is_heating = true;
-                digitalWrite(PIN_BREWHEAT, LOW); //inverted
-                init_heat_timecount = 1.2 * 4184.0 * (92.0 - temphead)/1500.0;
-                init_heat_time = millis();
+                if (millis()> time_stop_heat + t_wait_reheat * 1000) { //Otherwise cut and start continuosly
+                  is_heating = true;
+                  digitalWrite(PIN_BREWHEAT, LOW); //inverted
+                  init_heat_timecount = 1.2 * 4184.0 * (92.0 - temphead)/1500.0;
+                  init_heat_time = millis();
+                }
               }
             }
         } else {
