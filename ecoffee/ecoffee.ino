@@ -55,13 +55,15 @@ bool ready_to_heat;
 bool is_dT_rising_slow;
 float dT_max;//dTdt
 float dT, prev_dT;//dTdt
+int pumpsw_state;
 
 void setup() {
 
     //wifi.Init();
-    
+    pinMode(PIN_PUMPSW,INPUT_PULLUP); 
     //pinMode(PIN_ACS_712,INPUT);  //Define the pin mode
     pinMode(PIN_BREWHEAT,OUTPUT); 
+    pinMode(PIN_PUMP,OUTPUT); 
     //wifi.Init();
     sensors.begin();
     //init_display();
@@ -106,7 +108,14 @@ void loop() {
 
   float rem_time;
   curr_time=millis(); 
-
+  pumpsw_state = digitalRead(PIN_PUMPSW);
+  
+  if (pumpsw_state == HIGH) {
+    digitalWrite(PIN_PUMP, LOW); // RELAY IS INVERTED
+  } else {
+    digitalWrite(PIN_PUMP, HIGH);
+  }
+  
   //Not calculate each time     
     if (is_heating) {
       rem_time = init_heat_timecount - (float)(curr_time - init_heat_time)/1000.0;
@@ -156,7 +165,7 @@ void loop() {
         if (dT < prev_dT ) { //slowing rising
           writeLine(1, "S", 15);
           if (dT < 0.05){
-            if (temphead < 92.0){
+            if (temphead < 95.0){
                 is_heating = true;
                 digitalWrite(PIN_BREWHEAT, LOW); //inverted
                 init_heat_timecount = 1.2 * 4184.0 * (92.0 - temphead)/1500.0;

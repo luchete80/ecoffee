@@ -8,11 +8,13 @@
 
 #define PIN_TEMP          5
 #define PIN_FLOWMETER     6
-
+#define PIN_PUMPSW        7 //INPUT
+ 
 
 //Alarms 
 #define PIN_BUZZER        3
 #define PIN_BREWHEAT      8
+#define PIN_PUMP          9 //OUTPUT
 #define PIN_ACS_712       A0
 
 #endif
