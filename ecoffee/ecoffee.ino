@@ -66,6 +66,8 @@ void setup() {
     //pinMode(PIN_ACS_712,INPUT);  //Define the pin mode
     pinMode(PIN_BREWHEAT,OUTPUT); 
     pinMode(PIN_PUMP,OUTPUT); 
+    
+    digitalWrite(PIN_PUMP, HIGH); //Inverted,low
     //wifi.Init();
     sensors.begin();
     //init_display();
